@@ -64,11 +64,21 @@ def update_menu_for_day(table_name,db_name,owner_id,data):
 	for ele in data[1]:
 		ele['Dates']=str(timestamp)
 		query+="insert into %s (Items_name,Description,Price,Max,Dates,In_menu,Times_in_menu,Canteen_id) values('%s','%s',%s,%s,'%s',%s,%s,%s);"%(table_name,ele['Items_name'],ele['Description'],ele['Price'],ele['Max'],ele['Dates'],1,1,val['Canteen_id'])
+		print(ele)
 	for result in cursor.execute(query,multi=True):
 		pass
 	conn.commit()
 	cursor.execute('select Items_id,Items_name,Description,Price,Max,Dates from %s where In_menu=1 and Canteen_id=%s' %(table_name,val['Canteen_id']))
-	return cursor.fetchall()
+	data = cursor.fetchall()
+	query = "delete from Has;"
+	for d in data:
+		query+="insert into Has values(%s, %s, %s);"%(val['Canteen_id'], d['Items_id'], d['Max'])
+	print(data)
+	print(query)
+	for result in cursor.execute(query,multi=True):
+		pass
+	conn.commit()
+	return data
 
 
 def replace_key(old_list, new_key, old_key):
