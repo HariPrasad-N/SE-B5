@@ -29,27 +29,27 @@ class TestApp:
 		
 	def test_page_profile(self, client):
 		res = client.get(url_for('canteen.customer_page_profile'))
-		assert res.status_code == 200
+		assert res.status_code == 302
 		
 	def test_page_login(self, client):
 		res = client.get(url_for('canteen.customer_page_login'))
-		assert res.status_code == 200
+		assert res.status_code == 302
 		
 	def test_page_lockscreen(self, client):
 		res = client.get(url_for('canteen.customer_page_lockscreen'))
-		assert res.status_code == 200
+		assert res.status_code == 302
 		
 	def test_charts(self, client):
 		res = client.get(url_for('canteen.customer_charts'))
-		assert res.status_code == 200
+		assert res.status_code == 302
 		
 	def test_notifications(self, client):
 		res = client.get(url_for('canteen.customer_notifications'))
-		assert res.status_code == 200
+		assert res.status_code == 302
 		
 	def test_tables(self, client):
 		res = client.get(url_for('canteen.customer_tables'))
-		assert res.status_code == 200
+		assert res.status_code == 302
 		
 	def test_icons(self, client):
 		res = client.get(url_for('canteen.customer_icons'))

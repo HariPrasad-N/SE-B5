@@ -42,13 +42,14 @@ def set_menu_for_day():
 		data=request.get_json()
 		return jsonify(update_menu_for_day("Items","canteen",session['Owner_id'],data))
 
+
 @canteen.route('/customer_form')
 def customer_form():
-	return render_template('customer/customer_form.html')
+	return render_template('customer/customer.html.html')
 
 @canteen.route('/owner_form')
 def owner_form():
-	return render_template('canteen_owner/owner_form.html')
+	return render_template('canteen_owner/canteen_owner.html.html')
 
 @canteen.route('customer/customer_form_submit',methods=['POST'])
 @csrf.exempt
@@ -61,7 +62,7 @@ def parse_customer_form():
 	data['Social_id'] = session['social_id'] #110058041200100630475
 	data['Email'] = session['email_address']
 	session['User_id'] = insert_customer('canteen', data)
-	return str(session)
+	return redirect(url_for('canteen.customer_owner_index'))
 
 @canteen.route('/owner_form_submit',methods=['POST'])
 @csrf.exempt
@@ -72,7 +73,7 @@ def parse_owner_form():
 	data['Email'] = session['email_address']
 	data['Canteen_name'] = request.form['canteen_name']
 	session['Owner_id'] = insert_owner('canteen', data)
-	return str(session)
+	return redirect(url_for('canteen.canteen_owner_owner_index'))
 
 @canteen.route('/selectpayment/<cost>')
 def selectpayment(cost):
@@ -160,51 +161,74 @@ def complete_order():
 
 @canteen.route('/canteen_owner/typography.html')
 def canteen_owner_typography():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/typography.html')
 
 @canteen.route('/canteen_owner/icons.html')
 def canteen_owner_icons():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/icons.html')
 
 @canteen.route('/canteen_owner/tables.html')
 def canteen_owner_tables():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/tables.html', data = get_canteen_details('canteen'))
 
 @canteen.route('/canteen_owner/parent_template.html')
 def canteen_owner_parent_template():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/parent_template.html')
 
 @canteen.route('/canteen_owner/notifications.html')
 def canteen_owner_notifications():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/notifications.html')
 
 @canteen.route('/canteen_owner/charts.html')
 def canteen_owner_charts():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/charts.html', gender_data = get_user_details('canteen', 'Users', 'Gender'), dept_data = get_user_details('canteen', 'Users', 'Department'), sem_data = get_user_details('canteen', 'Users', 'Semester'))
 
 @canteen.route('/canteen_owner/page-lockscreen.html')
 def canteen_owner_page_lockscreen():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/page-lockscreen.html')
 
 @canteen.route('/canteen_owner/page-login.html')
 def canteen_owner_page_login():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/page-login.html')
 
 @canteen.route('/canteen_owner/page-profile.html')
 def canteen_owner_page_profile():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/page-profile.html')
 
 @canteen.route('/canteen_owner/panels.html')
 def canteen_owner_panels():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/panels.html')
 
 @canteen.route('/canteen_owner/elements.html')
-@login_required
 def canteen_owner_elements():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/elements.html')
 
 @canteen.route('/canteen_owner/index.html')
 def canteen_owner_owner_index():
+	if(session.get('user_type')!="owner"):
+		return redirect(url_for('oauth2.signin_owner'))
 	return render_template('canteen_owner/index.html')
 
 """@canteen.route('/customer/items')
@@ -219,6 +243,8 @@ def items_index():
 @canteen.route('/customer/typography.html', methods=['GET'])
 @login_required
 def customer_typography():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	canteen_id = int(request.args.get('canteen'))
 	return render_template('customer/typography.html', data = {'items':get_items_canteen('canteen', canteen_id),'fav':get_favorites('canteen',int(session['User_id']))})
 
@@ -230,58 +256,75 @@ def customer_typography():
 
 
 @canteen.route('/customer/icons.html')
-@login_required
 def customer_icons():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/icons.html', data = recommend('canteen',int(session['User_id']),n=4))
 
 @canteen.route('/customer/tables.html')
 def customer_tables():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/tables.html', data = get_items('Canteen', 'canteen'))
 
 @canteen.route('/customer/parent_template.html')
 def customer_parent_template():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/parent_template.html')
 
 @canteen.route('/customer/notifications.html')
 def customer_notifications():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/notifications.html')
 
 @canteen.route('/customer/charts.html')
 def customer_charts():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/charts.html')
 
 @canteen.route('/customer/page-lockscreen.html')
 def customer_page_lockscreen():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/page-lockscreen.html')
 
 @canteen.route('/customer/page-login.html')
 def customer_page_login():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/page-login.html')
 
 @canteen.route('/customer/page-profile.html')
 def customer_page_profile():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/page-profile.html')
 
 @canteen.route('/customer/panels.html',methods=['GET'])
-@login_required
 def customer_panels():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/panels.html',data={'items': get_favorites_item_list('canteen',int(session['User_id'])),'fav':get_favorites('canteen',int(session['User_id']))})
 
 @canteen.route('/customer/elements.html')
-@login_required
 def customer_elements():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/elements.html',data=get_user_orders('canteen',int(session['User_id'])))
 
 @canteen.route('/customer/index.html')
-@login_required
 def customer_owner_index():
-	# print(session['username'])
-	print(session)
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return render_template('customer/index.html')
 
 @canteen.route('/')
-#@login_required
 def index():
+	if(session.get('user_type')!="customer"):
+		return redirect(url_for('oauth2.signin_customer'))
 	return redirect(url_for('canteen.customer_owner_index'))
 
 

@@ -1,19 +1,60 @@
-{# index.html is used for homepage #}
-{%- extends "base/base.html" %}
-{% from "base/macros.html" import flash_alert %}
-{% block title %}Welcome to MYAPP{%- endblock title %}
-{% block content %}
-    <div class="container">
-        {{ flash_alert() }}
-        <div class="row">
-            <div class="col-md">
-                <h1>Welcome to MYAPP</h1>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md">
-                <img class="img-hero" src="{{ url_for('static', filename='img/myapp-hero.jpg') }}" alt="MYAPP">
-            </div>
-        </div>
-    </div>
-{%- endblock %}
+<!DOCTYPE HTML>
+<!--
+    Projection by TEMPLATED
+    templated.co @templatedco
+    Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<html>
+    <head>
+        <title>InstaFood</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    </head>
+    <body>
+
+        <!-- Header -->
+            <header id="header">
+                <div class="inner">
+                    <a href="#" class="logo"><strong>Instant Food Delivery</strong> by INSTAFOOD</a>
+                    <nav id="nav">
+                        <a href="#">Home</a>
+                    </nav>
+                    <a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
+                </div>
+            </header>
+
+        <!-- Banner -->
+            <section id="banner">
+                <div class="inner">
+                    <header>
+                        <h1>Welcome to InstaFood</h1>
+                    </header>
+
+                    <div class="flex ">
+
+                        <div onclick="location.href='/oauth2/sign-in/customer';">
+                            <span class="icon fa fa-group"></span>
+                            <h3>Customer Login</h3>
+                            <p>Order food instantly</p>
+                        </div>
+
+                        <div onclick="location.href='/oauth2/sign-in/owner';">
+                            <span class="icon fa fa-id-badge"></span>
+                            <h3>Owner Login</h3>
+                            <p>Manage your canteen</p>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        <!-- Scripts -->
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+            <script src=https://cdnjs.cloudflare.com/ajax/libs/skel/3.0.1/skel.min.js></script>
+            <script src="{{url_for('static', filename='auth/main.js')}}"></script>
+            <script src="{{url_for('static', filename='auth/util.js')}}"></script>
+
+    </body>
+</html>
