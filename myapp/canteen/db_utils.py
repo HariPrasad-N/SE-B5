@@ -53,14 +53,14 @@ def update_menu_for_day(table_name,db_name,owner_id,data):
 	cursor.execute('select Canteen_id from Canteen where Owner_id=%s'%(owner_id))
 	val=cursor.fetchone()
 	for ele in data[0]:
-		print(ele)
 		d=ele['Dates'].split(',')
 		if d[-1]!=str(timestamp):
 			ele['Dates']+=','+str(timestamp)
 		query+="update %s set Items_name='%s',Description='%s',Price=%s,Max=%s,Dates='%s',In_menu=1, Times_in_menu=Times_in_menu+1 where Items_id=%s;" % (table_name,ele['Items_name'],ele['Description'],ele['Price'],ele['Max'],ele['Dates'],ele['Items_id'])
 		ids.append(str(ele['Items_id']))
+	if len(ids)>0:
+		query+='update %s set In_menu=0 where Canteen_id=%s and Items_id not in (%s);' %(table_name,val['Canteen_id'],','.join(ids))
 	query+="update Canteen set Updated_on='%s' where Canteen_id=%s;" %(str(dat),val['Canteen_id'])
-	query+='update %s set In_menu=0 where Canteen_id=%s and Items_id not in (%s);' %(table_name,val['Canteen_id'],','.join(ids))
 	for ele in data[1]:
 		ele['Dates']=str(timestamp)
 		query+="insert into %s (Items_name,Description,Price,Max,Dates,In_menu,Times_in_menu,Canteen_id) values('%s','%s',%s,%s,'%s',%s,%s,%s);"%(table_name,ele['Items_name'],ele['Description'],ele['Price'],ele['Max'],ele['Dates'],1,1,val['Canteen_id'])
