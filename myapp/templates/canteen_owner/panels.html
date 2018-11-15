@@ -22,18 +22,18 @@
 															<th>Item </th>
 															<th>Item Name</th>
 															<th>Orders</th>
-															<th>Paid</th>
-															<th>Unpaid</th>
+															<th>Completed</th>
 														</tr>
 													</thead>
 													<tbody>
+														{% for item in data%}
 														<tr>
 															<td><img src="{{url_for('static', filename='canteen-owner/img/default_food.jpg')}}" style="width:100px;height:80px;"></td>
-															<td></td>
-															<td></td>
-															<td></td>
-															<td></td>
-														</tr>	
+															<td>{{item.Items_name}}</td>
+															<td>{{item.Orders}}</td>
+															<td>{{item.Completed}}</td>
+														</tr>
+														{% endfor %}	
 													</tbody>
 												</table>
 											</div>

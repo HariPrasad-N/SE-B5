@@ -4,6 +4,98 @@ from datetime import date
 from sklearn.linear_model import LinearRegression
 import numpy as np
 
+def get_orders_per_item(db_name,owner_id):
+	conn = mysql.connector.connect(
+				host="localhost",
+				user="root",
+				passwd="",
+				database=db_name
+			)
+	cursor = conn.cursor(dictionary=True)
+	cursor.execute('SELECT I.Items_name,(SELECT COUNT(*) FROM Purchases P WHERE P.Item_id=I.Items_id ) AS Orders,(SELECT COUNT(*) FROM Purchases P WHERE P.Item_id=I.Items_id AND P.Status=1) AS Completed FROM Items I WHERE I.Canteen_id IN(SELECT Canteen_id FROM Canteen WHERE Owner_id=%s)' %(owner_id))
+	return cursor.fetchall()
+
+def get_customer_index(db_name,user_id):
+	conn = mysql.connector.connect(
+				host="localhost",
+				user="root",
+				passwd="",
+				database=db_name
+			)
+	cursor = conn.cursor(dictionary=True)
+	data=dict()
+
+	cursor.execute('SELECT Count(DISTINCT Purchase_basket_id) AS torders FROM Purchases WHERE User_id=%s' %(user_id))
+	result=cursor.fetchone()
+	data['torders']=result['torders']
+
+	cursor.execute('SELECT SUM(Transaction_amount) AS total FROM Transactions WHERE Transaction_id IN (SELECT Purchase_basket_id FROM Purchases WHERE User_id=%s)' %(user_id))
+	result=cursor.fetchone()
+	data['total']=result['total']
+
+	cursor.execute('SELECT Count(*) AS Orders,WEEKDAY(Transaction_timestamp) AS Days FROM Transactions WHERE Transaction_id IN (SELECT Purchase_basket_id FROM Purchases WHERE User_id=%s) GROUP BY(Transaction_timestamp)' %(user_id))
+	result=cursor.fetchall()
+	data['g2']=result
+
+	cursor.execute('SELECT SUM(Transaction_amount) AS total,WEEKDAY(Transaction_timestamp) AS Days FROM Transactions WHERE Transaction_id IN (SELECT Purchase_basket_id FROM Purchases WHERE User_id=%s) GROUP BY(Transaction_timestamp)' %(user_id))
+	result=cursor.fetchall()
+	data['g1']=result
+
+	cursor.execute('SELECT P.Purchase_basket_id, I.Items_name, I.Price,T.Transaction_timestamp,P.Status FROM Purchases P JOIN Transactions T ON P.Purchase_basket_id=T.Transaction_id JOIN Items I ON P.Item_id=I.Items_id WHERE P.User_id=%s ORDER BY(T.Transaction_timestamp) DESC' %(user_id))
+	result=cursor.fetchall()
+	data['purchase']=result
+
+	return data
+
+
+def get_owner_index(db_name,owner_id):
+	conn = mysql.connector.connect(
+				host="localhost",
+				user="root",
+				passwd="",
+				database=db_name
+			)
+	cursor = conn.cursor(dictionary=True)
+	dat=date.today()
+	data=dict()
+	cursor.execute('SELECT COUNT(DISTINCT User_id) AS Users FROM Purchases WHERE Item_id in (SELECT Items_id from Items WHERE Canteen_id in(SELECT Canteen_id FROM Canteen WHERE Owner_id=%s))' %(owner_id))
+	result=cursor.fetchone()
+	data['Users']=result['Users']
+	
+	cursor.execute('SELECT COUNT(*) AS completed FROM Purchases WHERE Status=1 and Item_id IN (SELECT Items_id FROM Items WHERE Canteen_id IN (SELECT Canteen_id FROM Canteen WHERE Owner_id=%s))' % (owner_id))
+	result=cursor.fetchone()
+	data['completed']=result['completed']
+	
+	cursor.execute('SELECT COUNT(*) AS progress FROM Purchases WHERE Status=0 and Item_id IN (SELECT Items_id FROM Items WHERE Canteen_id IN (SELECT Canteen_id FROM Canteen WHERE Owner_id=%s))' %(owner_id))
+	result=cursor.fetchone()
+	data['progress']=result['progress']
+	
+	cursor.execute('SELECT SUM(Price) AS tot_income FROM Items I JOIN Purchases P ON I.Items_id=P.Item_id WHERE I.Canteen_id IN (SELECT Canteen_id from Canteen WHERE Owner_id=%s)' %(owner_id))
+	result=cursor.fetchone()
+	data['tot_income']=result['tot_income']
+	
+	cursor.execute('SELECT COUNT(DISTINCT DATE(T.Transaction_timestamp)) AS tdays FROM Purchases P JOIN Transactions T ON P.Purchase_basket_id=T.Transaction_id WHERE P.Item_id IN(SELECT Items_id FROM Items WHERE Canteen_id IN (SELECT Canteen_id FROM Canteen WHERE Owner_id=%s))' %(owner_id))
+	result=cursor.fetchone()
+	data['tdays']=result['tdays']
+	
+	cursor.execute("SELECT SUM(Price) AS tincome FROM Items I JOIN Purchases P ON I.Items_id=P.Item_id WHERE I.Canteen_id IN (SELECT Canteen_id from Canteen WHERE Owner_id=%s) AND P.Purchase_basket_id IN (SELECT Transaction_id from Transactions WHERE Date(Transaction_timestamp)='%s')" %(owner_id,dat))
+	result=cursor.fetchone()
+	data['tincome']=result['tincome']
+
+	
+	cursor.execute("SELECT SUM(I.Price) AS Tot ,WEEKDAY(T.Transaction_timestamp) AS Days FROM Purchases P JOIN Transactions T ON P.Purchase_basket_id=T.Transaction_id JOIN Items I ON P.Item_id=I.Items_id WHERE I.Canteen_id IN(SELECT Canteen_id FROM Canteen WHERE Owner_id=%s) GROUP BY(WEEKDAY(T.Transaction_timestamp))" %(owner_id))
+	result=cursor.fetchall()
+	data['g1']=result
+	
+	cursor.execute('SELECT COUNT(DISTINCT T.Transaction_id) AS Orders,WEEKDAY(T.Transaction_timestamp) AS Days FROM Purchases P JOIN Transactions T ON P.Purchase_basket_id=T.Transaction_id JOIN Items I ON P.Item_id=I.Items_id WHERE I.Canteen_id IN(SELECT Canteen_id FROM Canteen WHERE Owner_id=%s) GROUP BY(WEEKDAY(T.Transaction_timestamp))' %(owner_id))
+	result=cursor.fetchall()
+	data['g2']=result
+	
+	cursor.execute('SELECT T.Transaction_id,I.Items_name,I.Price,T.Transaction_timestamp,P.Status FROM Purchases P JOIN Transactions T ON P.Purchase_basket_id=T.Transaction_id JOIN Items I ON P.Item_id=I.Items_id WHERE I.Canteen_id IN(SELECT Canteen_id FROM Canteen WHERE Owner_id=%s) ORDER BY(T.Transaction_timestamp) DESC' %(owner_id))
+	result=cursor.fetchall()
+	data['purchase']=result
+
+	return data
 
 def get_menu_for_day(table_name, db_name,owner_id):
 	conn = mysql.connector.connect(
@@ -60,6 +152,8 @@ def update_menu_for_day(table_name,db_name,owner_id,data):
 		ids.append(str(ele['Items_id']))
 	if len(ids)>0:
 		query+='update %s set In_menu=0 where Canteen_id=%s and Items_id not in (%s);' %(table_name,val['Canteen_id'],','.join(ids))
+	else:
+		query+='update %s set In_menu=0 where Canteen_id=%s;' %(table_name,val['Canteen_id'])
 	query+="update Canteen set Updated_on='%s' where Canteen_id=%s;" %(str(dat),val['Canteen_id'])
 	for ele in data[1]:
 		ele['Dates']=str(timestamp)
